@@ -1,0 +1,81 @@
+{
+  "type": "datasource",
+  "name": "grafana-flexera-datasource",
+  "id": "grafana-flexera-datasource",
+  "metrics": true,
+  "info": {
+    "description": "Cloud management and analytics tool for public, private, and hybrid clouds.",
+    "author": {
+      "name": "Jonathan Dorsey",
+      "url": ""
+    },
+    "keywords": [],
+    "logos": {
+      "small": "img/logo.png",
+      "large": "img/logo.png"
+    },
+    "links": [
+      {
+        "name": "Project",
+        "url": "https://dev.azure.com/AIZ-GT/GT.ICS-FIT/_git/grafana-flexera-datasource"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaVersion": "7.0.x",
+    "plugins": []
+  },
+  "routes": [
+    {
+      "path": "bill-analysis",
+      "method": "*",
+      "url": "https://optima.rightscale.com/bill-analysis",
+      "tokenAuth": {
+        "url": "https://{{ .JsonData.api_endpoint }}/api/acct/{{ .JsonData.account }}/oauth2",
+        "headers": [
+          {
+            "name": "X-API-Version",
+            "content": "1.0"
+          }
+        ],
+        "params": {
+          "grant_type": "refresh_token",
+          "refresh_token": "{{ .SecureJsonData.refresh_token }}"
+        }
+      },
+      "headers": [
+        {
+          "name": "API-Version",
+          "content": "1.0"
+        }
+      ]
+    },
+    {
+      "path": "analytics",
+      "method": "*",
+      "url": "https://optima.rightscale.com/analytics",
+      "tokenAuth": {
+        "url": "https://{{ .JsonData.api_endpoint }}/api/acct/{{ .JsonData.account }}/oauth2",
+        "headers": [
+          {
+            "name": "X-API-Version",
+            "content": "1.0"
+          }
+        ],
+        "params": {
+          "grant_type": "refresh_token",
+          "refresh_token": "{{ .SecureJsonData.refresh_token }}"
+        }
+      },
+      "headers": [
+        {
+          "name": "API-Version",
+          "content": "1.0"
+        }
+      ]
+    }
+  ]
+}
