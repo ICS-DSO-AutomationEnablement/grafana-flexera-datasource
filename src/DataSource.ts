@@ -4,10 +4,11 @@ import {
   DataSourceApi,
   DataSourceInstanceSettings,
   FieldType,
+  MetricFindValue,
   MutableDataFrame,
 } from '@grafana/data';
 import { flatten } from 'lodash';
-import { getBackendSrv } from '@grafana/runtime';
+import { getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 
 import { BillingCenter, Dimension, FlexeraDataSourceJsonData, FlexeraQuery } from './types';
 
@@ -85,6 +86,7 @@ export class FlexeraDataSource extends DataSourceApi<FlexeraQuery, FlexeraDataSo
     startTimestamp: string,
     endTimestamp: string
   ): string {
+    query.dimensionGroupBy = getTemplateSrv().replace(query.dimensionGroupBy, options.scopedVars);
     let requestBody =
       '{"granularity":"' +
       query.granularity +
@@ -354,5 +356,26 @@ export class FlexeraDataSource extends DataSourceApi<FlexeraQuery, FlexeraDataSo
       retValue = retValTemp;
     }
     return retValue;
+  }
+
+  async metricFindQuery(query: string) {
+    if (!query) {
+      return Promise.resolve([]);
+    }
+    const dimensionQuery = query.match(/^Dimensions\(\)/i);
+    if (dimensionQuery) {
+      return this.getDimensions().then(dimensions => {
+        let metrics: MetricFindValue[] = [];
+        dimensions.forEach((dimension: Dimension) => {
+          let metric: MetricFindValue = {
+            text: dimension.id,
+          };
+          metrics.push(metric);
+        });
+        return metrics;
+      });
+    }
+
+    return Promise.resolve([]);
   }
 }
